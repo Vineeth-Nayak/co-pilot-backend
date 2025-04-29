@@ -13,4 +13,7 @@ router.get('/:id', articleController.getArticleById);
 // create a new article
 router.post('/', articleController.createArticle);
 
+// update an article    
+router.put('/:id', articleController.updateArticle);
+
 module.exports = router;

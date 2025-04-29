@@ -105,7 +105,7 @@ const createArticle = async (req, res) => {
         const { title, subtitle, articleImage, articleType = "text", description, mediaUrl, category, tags, author } = req.body;
 
         // check if the required fields are present
-        if (!title || !articleImage || !description || !category || !author) {
+        if (!title || !articleImage || !category || !author) {
             return res.status(400).json({ status: 0, message: 'Please provide all required fields' });
         }
 
@@ -149,9 +149,59 @@ const createArticle = async (req, res) => {
         res.status(500).json({ status: 0, message: error.message });
     }
 };
+
+// create a put route to update an article by id
+const updateArticle = async (req, res) => {
+    try {
+        const articleId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(articleId)) {
+            return res.status(400).json({ status: 0, message: 'Invalid article ID' });
+        }
+
+        // check if the required fields are present
+        const { title, subtitle, articleImage, articleType = "text", description, mediaUrl, category, tags, author } = req.body;
+
+        if (!title || !articleImage || !category || !author) {
+            return res.status(400).json({ status: 0, message: 'Please provide all required fields' });
+        }
+
+        // create a request body object to update the article
+        const articleData = {
+            title,
+            subtitle,
+            articleImage,
+            articleType,
+            description,
+            mediaUrl,
+            category,
+            tags,
+            author,
+        };
+
+        // update the article in the database
+        const article = await Article.findByIdAndUpdate(articleId, articleData, { new: true });
+
+
+        if (!article) {
+            return res.status(404).json({ status: 0, message: 'Article not found' });
+        }
+        res.status(200).json({ status: 1, data: article });
+    }
+    catch (error) {
+        res.status(500).json({ status: 0, message: error.message });
+    }
+}
+
+
+
+
+
+
+
 // Export the router instance
 module.exports = {
     getArticles,
     getArticleById,
-    createArticle
+    createArticle,
+    updateArticle
 };

@@ -21,7 +21,6 @@ const articleSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
     },
     mediaUrl: {
         type: String
