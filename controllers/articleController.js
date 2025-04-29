@@ -62,7 +62,8 @@ const getArticles = async (req, res) => {
             authorObjectId: article.author?._id || null,
             articleObjectId: article?._id?.toString(),
             articleType: article.articleType === 'text' ? 1 : article.articleType === 'audio' ? 2 : 3,
-            tags: article.tags || []
+            tags: article.tags || [],
+            publishDate: article.publishDate || null,
         }));
 
         res.status(200).json({
