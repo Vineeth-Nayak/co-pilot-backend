@@ -1,58 +1,57 @@
 // import mongoose and article model
 const Article = require('../models/articleModel');
+const Category = require('../models/categoryModel');
 const { default: mongoose } = require('mongoose');
 
 // create a async function to get all articles with filters
 const getArticles = async (req, res) => {
     try {
         const { page = 1, categoryId, tag, authorName, articleType } = req.query;
-        const limit = req.query.limit || 10; // Default limit is 10
-        const skip = (page - 1) * limit; // Calculate the number of documents to skip
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
         let query = {};
 
-        if (categoryId) query.category = categoryId;
-        if (tag) query.tags = tag;
-        if (authorName) query['author.authorName'] = authorName;
-        if (articleType) query.articleType = articleType;
-
-        // Create a filters object to hold the filter criteria
-        const filters = {
-            category: categoryId,
-            tags: tag,
-            'author.authorName': authorName,
-            articleType: articleType,
-        };
-
-
-        // Apply filters
-        for (const key in filters) {
-            if (filters[key]) {
-                query[key] = filters[key];
+        // Handle categoryId input: can be custom string or ObjectId
+        if (categoryId) {
+            if (mongoose.Types.ObjectId.isValid(categoryId)) {
+                query.category = categoryId;
+            } else {
+                const categoryDoc = await Category.findOne({ categoryId });
+                if (!categoryDoc) {
+                    return res.status(404).json({ status: 0, message: 'Category not found' });
+                }
+                query.category = categoryDoc._id;
             }
         }
 
-        // Sort and paginate
-        const articles = await Article.find(query)
-            .sort({ publishDate: -1 }) // Sort by publishDate in descending order
-            .populate('author category') // Populate author and category fields
+        if (tag) query.tags = tag;
+        if (articleType) query.articleType = articleType;
+
+        // First, fetch articles with basic filters (except authorName)
+        let articlesQuery = Article.find(query)
+            .sort({ publishDate: -1 })
+            .populate({
+                path: 'author',
+                match: authorName ? { authorName: new RegExp(`^${authorName}$`, 'i') } : {},
+            })
+            .populate('category')
             .select('title subtitle articleImage articleType category tags author publishDate')
             .skip(skip)
-            .limit(Number(limit));
+            .limit(limit);
 
-        // error handling for empty articles
+        let articles = await articlesQuery;
+
+        // Filter out articles with no matching author (if authorName was used)
+        if (authorName) {
+            articles = articles.filter(article => article.author);
+        }
+
         if (articles.length === 0) {
             return res.status(404).json({ status: 0, message: 'No articles found' });
         }
 
-
-        // Count total articles for pagination  
         const totalArticles = await Article.countDocuments(query);
-        if (totalArticles === 0) {
-            return res.status(404).json({ status: 0, message: 'No articles found' });
-        }
-
-        // Convert articles to the required format
         const formattedArticles = articles.map(article => ({
             title: article.title,
             hero: article.articleImage,
@@ -60,15 +59,15 @@ const getArticles = async (req, res) => {
             categoryObjectId: article.category?._id || null,
             authorId: article.author?.authorId || null,
             authorObjectId: article.author?._id || null,
-            articleObjectId: article?._id?.toString(),
+            articleObjectId: article._id.toString(),
             articleType: article.articleType === 'text' ? 1 : article.articleType === 'audio' ? 2 : 3,
             tags: article.tags || [],
             publishDate: article.publishDate || null,
         }));
 
-        res.status(200).json({
+        return res.status(200).json({
             status: 1,
-            message: "success",
+            message: 'success',
             data: {
                 articles: formattedArticles,
                 categoryId: categoryId || null,
@@ -77,12 +76,13 @@ const getArticles = async (req, res) => {
                 page: Number(page),
                 totalPages: Math.ceil(totalArticles / limit),
             },
-            // currentPage: Number(page),
         });
+
     } catch (error) {
-        res.status(500).json({ status: 0, message: error.message });
+        return res.status(500).json({ status: 0, message: error.message });
     }
 };
+
 
 // create a get route to get a single article by id
 const getArticleById = async (req, res) => {
