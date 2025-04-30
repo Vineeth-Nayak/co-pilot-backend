@@ -87,6 +87,7 @@ const login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
+
         // 4. Send response
         res.json({
             status: 1,

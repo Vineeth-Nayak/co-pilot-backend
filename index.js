@@ -17,7 +17,22 @@ const app = express();
 dotenv.config();
 
 // Middleware
-app.use(cors());    // Enable CORS for all routes
+// allow cors for localhost:3000 and localhost:5000
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:5000'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true,
+};
+app.use(cors(corsOptions)); // Enable CORS with options
 app.use(express.json()); // Parse JSON bodies
 
 // MongoDB connection
