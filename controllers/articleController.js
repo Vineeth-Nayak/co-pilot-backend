@@ -48,6 +48,8 @@ const getArticles = async (req, res) => {
         if (tag) query.tags = tag;
         if (articleType) query.articleType = articleType;
 
+        console.log('Query:', query);
+
         // First, fetch articles with basic filters (except authorName)
         let articlesQuery = Article.find(query)
             .sort({ publishDate: -1 })
