@@ -2,8 +2,20 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 
-
-// register fucntion
+/**
+ * Registers a new user in the system.
+ *
+ * @async
+ * @function register
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The body of the request containing user details.
+ * @param {string} req.body.name - The name of the user.
+ * @param {string} req.body.email - The email of the user.
+ * @param {string} req.body.password - The password of the user.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} Sends a JSON response with the registration status, token, and user data.
+ * @throws {Error} Returns a 400 status if the email is already in use, or a 500 status for server errors.
+ */
 const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -56,8 +68,19 @@ const register = async (req, res) => {
     }
 };
 
-// ... keep existing login and verifyToken methods ...
-
+/**
+ * Logs in an existing user.
+ *
+ * @async
+ * @function login
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The body of the request containing login credentials.
+ * @param {string} req.body.email - The email of the user.
+ * @param {string} req.body.password - The password of the user.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} Sends a JSON response with the login status, token, and user data.
+ * @throws {Error} Returns a 401 status if credentials are invalid, or a 500 status for server errors.
+ */
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -111,6 +134,18 @@ const login = async (req, res) => {
     }
 };
 
+/**
+ * Verifies the JWT token provided in the request header.
+ *
+ * @function verifyToken
+ * @param {Object} req - The request object.
+ * @param {Object} req.header - The headers of the request.
+ * @param {string} req.header.Authorization - The authorization header containing the Bearer token.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {void} Calls the next middleware if the token is valid, or sends a 401 status if invalid.
+ * @throws {Error} Returns a 401 status if the token is missing or invalid.
+ */
 const verifyToken = (req, res, next) => {
     try {
         // 1. Get token from header

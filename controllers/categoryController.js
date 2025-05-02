@@ -2,7 +2,16 @@
 const { isValidObjectId } = require('mongoose');
 const Category = require('../models/categoryModel');
 
-// create a function to get all categories
+/**
+ * Retrieves all categories from the database.
+ *
+ * @async
+ * @function getCategories
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} Sends a JSON response with the list of categories or an error message.
+ * @throws {Error} Returns a 500 status if a server error occurs.
+ */
 const getCategories = async (req, res) => {
     try {
         const categories = await Category.find().select('-__v -createdAt -updatedAt');
@@ -21,7 +30,18 @@ const getCategories = async (req, res) => {
     }
 };
 
-// create a function to get a category by ID
+/**
+ * Retrieves a single category by ID from the database.
+ *
+ * @async
+ * @function getCategoryById
+ * @param {Object} req - The request object.
+ * @param {Object} req.params - The request parameters.
+ * @param {string} req.params.id - The ID of the category to retrieve.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} Sends a JSON response with the category data or an error message.
+ * @throws {Error} Returns a 404 status if the category is not found, or a 500 status for server errors.
+ */
 const getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -58,7 +78,18 @@ const getCategoryById = async (req, res) => {
     }
 };
 
-// create a function to create a new category
+/**
+ * Creates a new category in the database.
+ *
+ * @async
+ * @function createCategory
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The body of the request containing category details.
+ * @param {string} req.body.categoryName - The name of the category.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} Sends a JSON response with the created category data or an error message.
+ * @throws {Error} Returns a 400 status if validation fails, or a 500 status for server errors.
+ */
 const createCategory = async (req, res) => {
     try {
         const { categoryName } = req.body;
@@ -79,7 +110,20 @@ const createCategory = async (req, res) => {
     }
 };
 
-// create a function to update a category by ID
+/**
+ * Updates an existing category by ID in the database.
+ *
+ * @async
+ * @function updateCategoryById
+ * @param {Object} req - The request object.
+ * @param {Object} req.params - The request parameters.
+ * @param {string} req.params.id - The ID of the category to update.
+ * @param {Object} req.body - The body of the request containing updated category details.
+ * @param {string} [req.body.categoryName] - The updated name of the category (optional).
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} Sends a JSON response with the updated category data or an error message.
+ * @throws {Error} Returns a 404 status if the category is not found, a 400 status if validation fails, or a 500 status for server errors.
+ */
 const updateCategoryById = async (req, res) => {
 
     try {
