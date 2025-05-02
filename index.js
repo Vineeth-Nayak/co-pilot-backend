@@ -36,8 +36,9 @@ app.use(cors(corsOptions)); // Enable CORS with options
 app.use(express.json()); // Parse JSON bodies
 
 // MongoDB connection
-connectDB(process.env.MONGODB_URI)
-
+if (process.env.NODE_ENV !== 'test') {
+    connectDB(process.env.MONGODB_URI);
+}
 // Routes
 app.use('/api/authors', authorRoutes);  // Author routes
 app.use('/api/articles', articleRoutes); // Article routes  
@@ -52,3 +53,5 @@ const PORT = process.env.PORT || 5000;  // Default port is 5000
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+module.exports = app; // Export the app for testing
